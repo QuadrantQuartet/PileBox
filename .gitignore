@@ -74,3 +74,5 @@ Thumbs.db
 # cmake generated files
 CMakeLists.txt.user
 cmake-build-*
+
+.idea
