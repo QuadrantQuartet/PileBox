@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include <box2d/box2d.h>
+
 #include <QGraphicsRectItem>
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -20,47 +22,74 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
 bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
-    auto eventType = event->type();
-    qDebug() << eventType;
     if (watched == ui->graphicsView) {
+        auto eventType = event->type();
+        qDebug() << eventType;
         if (eventType == QEvent::MouseButtonPress) {
             auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
             if (mouseEvent->button() == Qt::RightButton) {
-                auto [x, y] = ui->graphicsView->mapToScene(mouseEvent->pos());
-                auto *item = new QGraphicsRectItem(x - 50, y - 50, 100, 100);
-                item->setBrush(Qt::red);
-                this->graphicsScene->addItem(item);
+                addRect(mapToScene(mouseEvent->pos()));
                 return true;
             } else if (mouseEvent->button() == Qt::LeftButton) {
-                graphicDragging = true;
-                QCursor cursor;
-                cursor.setShape(Qt::ClosedHandCursor);
-                ui->graphicsView->setCursor(cursor);
-                graphicDragStartPoint = mouseEvent->pos();
+                startDrag(mouseEvent->pos());
                 return true;
             }
         } else if (eventType == QEvent::MouseButtonRelease) {
-            graphicDragging = false;
-            QCursor cursor;
-            cursor.setShape(Qt::ArrowCursor);
-            ui->graphicsView->setCursor(cursor);
+            endDrag();
             return true;
-        } else if (eventType == QEvent::MouseMove) {
-            if (graphicDragging) {
-                auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
-                graphicDragOffset -= mouseEvent->pos() - graphicDragStartPoint;
-                graphicDragStartPoint = mouseEvent->pos();
-                auto delta = ui->graphicsView->transform().m11();
-                ui->graphicsView->setSceneRect(QRectF(
-                    graphicDragOffset / delta, ui->graphicsView->size()));
-                return true;
-            }
+        } else if (eventType == QEvent::MouseMove && graphicDragging) {
+            auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
+            updateDrag(mouseEvent->pos());
+            graphicsTranslate(graphicDragOffset);
+            return true;
         } else if (eventType == QEvent::Wheel) {
             auto wheelEvent = dynamic_cast<QWheelEvent *>(event);
             auto factor = exp(wheelEvent->angleDelta().y() / 1000.0);
-            ui->graphicsView->scale(factor, factor);
+            graphicsScale(factor);
+            return true;
         }
     }
     return QWidget::eventFilter(watched, event);
+}
+
+void MainWindow::addRect(const QPointF &pos) {
+    auto *item = new QGraphicsRectItem(pos.x() - 50, pos.y() - 50, 100, 100);
+    item->setBrush(Qt::red);
+    graphicsScene->addItem(item);
+}
+
+void MainWindow::startDrag(const QPoint &pos) {
+    graphicDragging = true;
+    QCursor cursor;
+    cursor.setShape(Qt::ClosedHandCursor);
+    ui->graphicsView->setCursor(cursor);
+    graphicDragStartPoint = pos;
+}
+
+void MainWindow::updateDrag(const QPoint &pos) {
+    graphicDragOffset -= pos - graphicDragStartPoint;
+    graphicDragStartPoint = pos;
+}
+
+void MainWindow::endDrag() {
+    graphicDragging = false;
+    QCursor cursor;
+    cursor.setShape(Qt::ArrowCursor);
+    ui->graphicsView->setCursor(cursor);
+}
+
+void MainWindow::graphicsScale(double factor) {
+    ui->graphicsView->scale(factor, factor);
+}
+
+void MainWindow::graphicsTranslate(const QPointF &offset) {
+    auto delta = ui->graphicsView->transform().m11();
+    graphicsScene->setSceneRect(
+        QRectF(offset / delta, ui->graphicsView->size()));
+}
+
+QPointF MainWindow::mapToScene(const QPoint &pos) const {
+    return ui->graphicsView->mapToScene(pos);
 }
