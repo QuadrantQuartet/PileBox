@@ -1,51 +1,33 @@
 #include "gamewidget.h"
-#include "ui_gamewidget.h"
-
-#include <box2d/box2d.h>
 
 #include <QGraphicsRectItem>
 #include <QMessageBox>
 #include <QMouseEvent>
 
-GameWidget::GameWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::GameWidget)
-{
+#include "box2dWidget/BoxScene.h"
+#include "ui_gamewidget.h"
+
+GameWidget::GameWidget(QWidget *parent)
+    : QWidget(parent), ui(new Ui::GameWidget) {
     ui->setupUi(this);
-//    ui->graphicsView->grabMouse();
+    //    ui->graphicsView->grabMouse();
     ui->graphicsView->installEventFilter(this);
     // 初始化图形界面
-    this->graphicsScene = new QGraphicsScene(this);
-    this->graphicsScene->setSceneRect(0, 0, ui->graphicsView->width(),
-                                      ui->graphicsView->height());
-    ui->graphicsView->setScene(this->graphicsScene);
+    this->boxScene = new BoxScene(this);
+    auto width = static_cast<qreal>(ui->graphicsView->width());
+    auto height = static_cast<qreal>(ui->graphicsView->height());
+    this->boxScene->setSceneRect(-width / 2, -height / 2, width, height);
+    ui->graphicsView->setScene(this->boxScene);
 }
 
-GameWidget::~GameWidget()
-{
-    delete ui;
-}
+GameWidget::~GameWidget() { delete ui; }
 
 bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
     if (watched == ui->graphicsView) {
         auto eventType = event->type();
-        qDebug() << eventType;
         if (eventType == QEvent::MouseButtonPress) {
             auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
-            if (mouseEvent->button() == Qt::RightButton) {
-                addRect(mapToScene(mouseEvent->pos()));
-                return true;
-            } else if (mouseEvent->button() == Qt::LeftButton) {
-                startDrag(mouseEvent->pos());
-                return true;
-            }
-        } else if (eventType == QEvent::MouseButtonRelease) {
-            endDrag();
-            return true;
-        } else if (eventType == QEvent::MouseMove && graphicDragging) {
-            auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
-            updateDrag(mouseEvent->pos());
-            graphicsTranslate(graphicDragOffset);
+            addRect(mapToScene(mouseEvent->pos()));
             return true;
         } else if (eventType == QEvent::Wheel) {
             auto wheelEvent = dynamic_cast<QWheelEvent *>(event);
@@ -58,29 +40,8 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void GameWidget::addRect(const QPointF &pos) {
-    auto *item = new QGraphicsRectItem(pos.x() - 50, pos.y() - 50, 100, 100);
+    auto *item = boxScene->createBody(pos.x(), pos.y(), 50, 50, 1, 0.3);
     item->setBrush(Qt::red);
-    graphicsScene->addItem(item);
-}
-
-void GameWidget::startDrag(const QPoint &pos) {
-    graphicDragging = true;
-    QCursor cursor;
-    cursor.setShape(Qt::ClosedHandCursor);
-    ui->graphicsView->setCursor(cursor);
-    graphicDragStartPoint = pos;
-}
-
-void GameWidget::updateDrag(const QPoint &pos) {
-    graphicDragOffset -= pos - graphicDragStartPoint;
-    graphicDragStartPoint = pos;
-}
-
-void GameWidget::endDrag() {
-    graphicDragging = false;
-    QCursor cursor;
-    cursor.setShape(Qt::ArrowCursor);
-    ui->graphicsView->setCursor(cursor);
 }
 
 void GameWidget::graphicsScale(double factor) {
@@ -89,13 +50,13 @@ void GameWidget::graphicsScale(double factor) {
 
 void GameWidget::graphicsTranslate(const QPointF &offset) {
     auto delta = ui->graphicsView->transform().m11();
-    graphicsScene->setSceneRect(
-        QRectF(offset / delta, ui->graphicsView->size()));
+    boxScene->setSceneRect(QRectF(offset / delta, ui->graphicsView->size()));
 }
 
 QPointF GameWidget::mapToScene(const QPoint &pos) const {
     return ui->graphicsView->mapToScene(pos);
 }
-
-
-
+void GameWidget::resizeEvent(QResizeEvent *event) {
+    QWidget::resizeEvent(event);
+    ui->graphicsView->resize(this->size());
+}
