@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    gamewidget=new GameWidget;
 }
 
 MainWindow::~MainWindow()
@@ -17,14 +18,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    GameWidget*gamewidget=new GameWidget;
-    this->close();
-    gamewidget->show();
+    this->setCentralWidget(gamewidget);
 }
 
 
 void MainWindow::on_exitButton_clicked()
 {
     this->close();
+}
+
+
+void MainWindow::on_helpButton_clicked()
+{
+//    QMessageBox::information(this, tr("Dynamic Layouts Help"),
+//                                   tr("This example shows how to change layouts "
+//                                      "dynamically."));
 }
 

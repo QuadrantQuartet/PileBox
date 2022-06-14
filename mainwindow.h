@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "gamewidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,8 +21,11 @@ private slots:
 
     void on_exitButton_clicked();
 
+    void on_helpButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    GameWidget*gamewidget;
 };
 
 #endif // MAINWINDOW_H
