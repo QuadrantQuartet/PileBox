@@ -10,6 +10,11 @@ namespace Ui {
 class GameWidget;
 }
 
+enum class GameState {
+    Running,
+    Stopped
+};
+
 class GameWidget : public QWidget {
     Q_OBJECT
   private:
@@ -35,11 +40,26 @@ class GameWidget : public QWidget {
   private:
     Ui::GameWidget* ui;
     BoxScene* boxScene;
+    QTimer* timer;
+    /// 最上面的箱子
+    b2Body* topBox = nullptr;
+    /// 箱子总高度
+    double totalHeight = 0;
+    /// 除最上面的以外的箱子高度
+    double secondTotalHeight = 0;
+    /// 游戏状态
+    GameState gameState = GameState::Stopped;
 
-    /// 在绘图区域中添加一个正方形
-    void addBox(const QPointF& pos);
+    /// 添加箱子
+    BoxItem addBox(const QPointF& pos);
 
+    /// 点击添加箱子
+    void clickAddBox(const QPointF& pos);
+
+    /// 平滑移动视图
     void smoothScroll(const QPointF& newOrigin, double speed);
+
+    void checkCollision();
 
     /// 将窗口坐标转换为绘图区域坐标
     [[nodiscard]] QPointF mapToScene(const QPoint& pos) const;

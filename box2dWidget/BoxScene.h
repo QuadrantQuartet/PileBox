@@ -44,18 +44,19 @@ class BoxScene : public QGraphicsScene {
     explicit BoxScene(QObject* parent = nullptr);
     ~BoxScene() override;
 
-    QAbstractGraphicsShapeItem* createBody(qreal x, qreal y, qreal w, qreal h,
+    BoxItem createBody(qreal x, qreal y, qreal w, qreal h,
                                            float density, float friction);
 };
 
 class BoxItem {
   public:
-    b2Body& body;
-    QAbstractGraphicsShapeItem& item;
+    b2Body* body;
+    QAbstractGraphicsShapeItem* item;
+    QGraphicsTextItem* text;
     explicit BoxItem(BoxScene& parent, b2Body* body,
                      QAbstractGraphicsShapeItem* item);
 
-    void update();
+    void update() const;
 };
 
 class BoxStaticItem : public BoxItem {

@@ -3,8 +3,8 @@
 BoxScene::BoxScene(QObject* parent)
     : QGraphicsScene(parent), world(b2Vec2(0.f, 10.f)) {
     // 初始化地面
-    ground = new BoxStaticItem(*this, 0., 450., 5000., 500.);
-    ground->item.setBrush(Qt::green);
+    ground = new BoxStaticItem(*this, 0., 250., 5000., 500.);
+    ground->item->setBrush(Qt::green);
 
     // 初始化计时器
     timer = new QTimer(this);
@@ -12,12 +12,11 @@ BoxScene::BoxScene(QObject* parent)
     connect(timer, &QTimer::timeout, this, &BoxScene::updateWorld);
 }
 
-QAbstractGraphicsShapeItem* BoxScene::createBody(qreal x, qreal y, qreal w,
-                                                 qreal h, float density,
-                                                 float friction) {
+BoxItem BoxScene::createBody(qreal x, qreal y, qreal w, qreal h, float density,
+                             float friction) {
     auto body = BoxDynamicItem(*this, x, y, w, h, density, friction);
     bodies.push_back(body);
-    return &body.item;
+    return body;
 }
 
 void BoxScene::updateWorld() {
@@ -37,19 +36,22 @@ BoxScene::~BoxScene() {
 
 BoxItem::BoxItem(BoxScene& parent, b2Body* body,
                  QAbstractGraphicsShapeItem* item)
-    : body(*body), item(*item) {
+    : body(body), item(item) {
     parent.addItem(item);
+
+    text = new QGraphicsTextItem(item);
+
     this->update();
 }
 
-void BoxItem::update() {
-    item.setPos(toPixel(body.GetPosition().x), toPixel(body.GetPosition().y));
-    item.setRotation(body.GetAngle() * 180 / b2_pi);
-    if (body.IsAwake()) {
-        item.setBrush(Qt::red);
-    } else {
-        item.setBrush(Qt::gray);
-    }
+void BoxItem::update() const {
+    auto x = toPixel(body->GetPosition().x);
+    auto y = toPixel(body->GetPosition().y);
+
+    text->setPlainText(QString("(%1, %2)").arg(x).arg(y));
+
+    item->setPos(x, y);
+    item->setRotation(body->GetAngle() * 180 / b2_pi);
 }
 
 BoxStaticItem::BoxStaticItem(BoxScene& parent, qreal x, qreal y, qreal w,
