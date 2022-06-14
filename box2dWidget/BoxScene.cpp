@@ -34,6 +34,12 @@ BoxScene::~BoxScene() {
     delete ground;
 }
 
+#ifdef QT_DEBUG
+bool BoxItem::debugMode = true;
+#else
+bool BoxItem::debugMode = false;
+#endif
+
 BoxItem::BoxItem(BoxScene& parent, b2Body* body,
                  QAbstractGraphicsShapeItem* item)
     : body(body), item(item) {
@@ -48,7 +54,10 @@ void BoxItem::update() const {
     auto x = toPixel(body->GetPosition().x);
     auto y = toPixel(body->GetPosition().y);
 
-    text->setPlainText(QString("(%1, %2)").arg(x).arg(y));
+    if (debugMode)
+        text->setPlainText(QString("(%1, %2)").arg(x).arg(y));
+    else
+        text->hide();
 
     item->setPos(x, y);
     item->setRotation(body->GetAngle() * 180 / b2_pi);

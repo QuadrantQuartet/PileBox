@@ -21,6 +21,7 @@ GameWidget::GameWidget(QWidget *parent)
     ui->graphicsView->setScene(this->boxScene);
 
     ui->lblGameOver->hide();
+    ui->lblScore->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     // 初始化第一个箱子
     auto baseBox = this->addBox(QPointF(0, 0));
@@ -58,13 +59,12 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void GameWidget::clickAddBox(const QPointF &pos) {
-    static QTime lastTime = QTime::currentTime();
-    constexpr int coolDownMsec = 500;
+    static QTime lastTime = QTime(0, 0);
+    constexpr int coolDownMsecs = 500;
 
     QTime currentTime = QTime::currentTime();
-    if (lastTime.msecsTo(currentTime) < coolDownMsec) {
-        return;
-    }
+    if (lastTime.msecsTo(currentTime) < coolDownMsecs) return;
+
     if (-pos.y() > totalHeight &&
         gameState == GameState::Running) {  // 只允许在上方添加箱子
         auto box = addBox(pos);
@@ -88,6 +88,7 @@ BoxItem GameWidget::addBox(const QPointF &pos) {
     if (totalHeight > 350 && height > 50) {
         smoothScroll(QPointF(0, -(totalHeight - 350) - 200), 360);
     }
+    ui->lblScore->setText(QString("高度: %1m").arg(toMeter(totalHeight)));
 
     topBox = box.body;
 
@@ -123,7 +124,8 @@ void GameWidget::smoothScroll(const QPointF &newOrigin, double speed) {
 
     auto offset = newOrigin - origin();
     double length = std::sqrt(QPointF::dotProduct(offset, offset));
-    animation->setDuration(static_cast<int>(length / speed * 1000));
+    animation->setDuration(
+        std::min(static_cast<int>(length / speed * 1000), 2000));
     animation->setEasingCurve(QEasingCurve::InOutCubic);
     animation->setStartValue(origin());
     animation->setEndValue(newOrigin);

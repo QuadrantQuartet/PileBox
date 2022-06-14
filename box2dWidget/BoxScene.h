@@ -52,7 +52,10 @@ class BoxItem {
   public:
     b2Body* body;
     QAbstractGraphicsShapeItem* item;
+
+    static bool debugMode;
     QGraphicsTextItem* text;
+
     explicit BoxItem(BoxScene& parent, b2Body* body,
                      QAbstractGraphicsShapeItem* item);
 
