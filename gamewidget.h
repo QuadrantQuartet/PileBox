@@ -12,6 +12,16 @@ class GameWidget;
 
 class GameWidget : public QWidget {
     Q_OBJECT
+  private:
+    QPointF _origin = QPointF(0, 0);
+    /// 坐标原点位置偏移
+    [[nodiscard]] const QPointF& origin() const;
+    void setOrigin(const QPointF& offset);
+
+    qreal _scale = 1.0;
+    /// 图形比例缩放
+    [[nodiscard]] qreal scale() const;
+    void setScale(qreal scale);
 
   public:
     explicit GameWidget(QWidget* parent = nullptr);
@@ -19,17 +29,17 @@ class GameWidget : public QWidget {
     void resizeEvent(QResizeEvent* event) override;
     ~GameWidget() override;
 
+    Q_PROPERTY(QPointF origin READ origin WRITE setOrigin)
+    Q_PROPERTY(qreal scale READ scale WRITE setScale)
+
   private:
     Ui::GameWidget* ui;
     BoxScene* boxScene;
-    QPointF offset = QPointF(0, 0);
 
     /// 在绘图区域中添加一个正方形
-    void addRect(const QPointF& pos);
-    /// 缩放绘图区域
-    void graphicsScale(double factor);
-    /// 平移绘图区域
-    void graphicsTranslate();
+    void addBox(const QPointF& pos);
+
+    void smoothScroll(const QPointF& newOrigin, double speed);
 
     /// 将窗口坐标转换为绘图区域坐标
     [[nodiscard]] QPointF mapToScene(const QPoint& pos) const;
