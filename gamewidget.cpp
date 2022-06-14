@@ -3,6 +3,7 @@
 #include <QGraphicsRectItem>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <random>
 
 #include "box2dWidget/BoxScene.h"
 #include "ui_gamewidget.h"
@@ -14,9 +15,7 @@ GameWidget::GameWidget(QWidget *parent)
     ui->graphicsView->installEventFilter(this);
     // 初始化图形界面
     this->boxScene = new BoxScene(this);
-    auto width = static_cast<qreal>(ui->graphicsView->width());
-    auto height = static_cast<qreal>(ui->graphicsView->height());
-    this->boxScene->setSceneRect(-width / 2, -height / 2, width, height);
+    this->graphicsTranslate();
     ui->graphicsView->setScene(this->boxScene);
 }
 
@@ -31,8 +30,9 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
             return true;
         } else if (eventType == QEvent::Wheel) {
             auto wheelEvent = dynamic_cast<QWheelEvent *>(event);
-            auto factor = exp(wheelEvent->angleDelta().y() / 1000.0);
-            graphicsScale(factor);
+            auto factor = wheelEvent->angleDelta().y() / 5.0;
+            offset.setY(offset.y() + factor);
+            graphicsTranslate();
             return true;
         }
     }
@@ -40,7 +40,11 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void GameWidget::addRect(const QPointF &pos) {
-    auto *item = boxScene->createBody(pos.x(), pos.y(), 50, 50, 1, 0.3);
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_real_distribution<> dis(30, 100);
+    double width = dis(gen), height = dis(gen);
+    auto *item = boxScene->createBody(pos.x(), pos.y(), width, height, 1, 0.3);
     item->setBrush(Qt::red);
 }
 
@@ -48,9 +52,11 @@ void GameWidget::graphicsScale(double factor) {
     ui->graphicsView->scale(factor, factor);
 }
 
-void GameWidget::graphicsTranslate(const QPointF &offset) {
+void GameWidget::graphicsTranslate() {
     auto delta = ui->graphicsView->transform().m11();
-    boxScene->setSceneRect(QRectF(offset / delta, ui->graphicsView->size()));
+    auto size = ui->graphicsView->size();
+    auto pos = offset / delta - QPointF(size.width(), size.height()) / 2;
+    boxScene->setSceneRect(QRectF(pos, size));
 }
 
 QPointF GameWidget::mapToScene(const QPoint &pos) const {
