@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Gaming Time</string>
+   <string>Pile Boxes</string>
   </property>
   <widget class="QGraphicsView" name="graphicsView">
    <property name="geometry">
