@@ -22,6 +22,7 @@ QAbstractGraphicsShapeItem* BoxScene::createBody(qreal x, qreal y, qreal w,
 
 void BoxScene::updateWorld() {
     world.Step(TIME_STEP, 10, 5);
+    world.ClearForces();
 
     for (auto& body : bodies) {
         body.update();
@@ -44,6 +45,11 @@ BoxItem::BoxItem(BoxScene& parent, b2Body* body,
 void BoxItem::update() {
     item.setPos(toPixel(body.GetPosition().x), toPixel(body.GetPosition().y));
     item.setRotation(body.GetAngle() * 180 / b2_pi);
+    if (body.IsAwake()) {
+        item.setBrush(Qt::red);
+    } else {
+        item.setBrush(Qt::gray);
+    }
 }
 
 BoxStaticItem::BoxStaticItem(BoxScene& parent, qreal x, qreal y, qreal w,
