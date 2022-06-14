@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "gamewidget.h"
 #include "ui_gamewidget.h"
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,8 +31,10 @@ void MainWindow::on_exitButton_clicked()
 
 void MainWindow::on_helpButton_clicked()
 {
-//    QMessageBox::information(this, tr("Dynamic Layouts Help"),
-//                                   tr("This example shows how to change layouts "
-//                                      "dynamically."));
+    QMessageBox msg;
+    msg.setText("The rule is very simple.\nJust pile the boxes as higher as you can in order to get higher scores.\nEnjoy you self and challange your best!");
+    msg.setStyleSheet("font :12pt");
+    msg.setWindowTitle("HelpPage");
+    msg.exec();
 }
 

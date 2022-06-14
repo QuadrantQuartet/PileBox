@@ -17,6 +17,8 @@ public:
     bool eventFilter(QObject* watched, QEvent* event) override;
     ~GameWidget();
 
+private slots:
+
 private:
     Ui::GameWidget *ui;
     QGraphicsScene* graphicsScene;
