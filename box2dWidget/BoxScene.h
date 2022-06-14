@@ -28,6 +28,7 @@ class BoxStaticItem;
 class BoxDynamicItem;
 
 class BoxScene : public QGraphicsScene {
+    Q_OBJECT
   private:
     QTimer* timer;
 
