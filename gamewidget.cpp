@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPropertyAnimation>
+#include <QTime>
 #include <random>
 
 #include "box2dWidget/BoxScene.h"
@@ -16,8 +17,24 @@ GameWidget::GameWidget(QWidget *parent)
     ui->graphicsView->installEventFilter(this);
     // 初始化图形界面
     this->boxScene = new BoxScene(this);
-    this->setOrigin(QPointF(0, 0));
+    this->setOrigin(QPointF(0, -200));
     ui->graphicsView->setScene(this->boxScene);
+
+    ui->lblGameOver->hide();
+
+    // 初始化第一个箱子
+    auto baseBox = this->addBox(QPointF(0, 0));
+    baseBox.item->setBrush(Qt::blue);
+    topBox = nullptr;  // 第一个箱子不参与位置结算
+
+    // 初始化定时器
+    this->timer = new QTimer(this);
+    timer->setInterval(100);
+    connect(this->timer, &QTimer::timeout, this, &GameWidget::checkCollision);
+    timer->start();
+
+    // 初始化游戏状态
+    this->gameState = GameState::Running;
 }
 
 GameWidget::~GameWidget() { delete ui; }
@@ -27,7 +44,8 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
         auto eventType = event->type();
         if (eventType == QEvent::MouseButtonPress) {
             auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
-            addBox(mapToScene(mouseEvent->pos()));
+            auto pos = mapToScene(mouseEvent->pos());
+            clickAddBox(pos);
             return true;
         } else if (eventType == QEvent::Wheel) {
             auto wheelEvent = dynamic_cast<QWheelEvent *>(event);
@@ -39,20 +57,41 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
     return QWidget::eventFilter(watched, event);
 }
 
-void GameWidget::addBox(const QPointF &pos) {
+void GameWidget::clickAddBox(const QPointF &pos) {
+    static QTime lastTime = QTime::currentTime();
+    constexpr int coolDownMsec = 500;
+
+    QTime currentTime = QTime::currentTime();
+    if (lastTime.msecsTo(currentTime) < coolDownMsec) {
+        return;
+    }
+    if (-pos.y() > totalHeight &&
+        gameState == GameState::Running) {  // 只允许在上方添加箱子
+        auto box = addBox(pos);
+        box.item->setBrush(Qt::red);
+    }
+    lastTime = currentTime;
+}
+
+BoxItem GameWidget::addBox(const QPointF &pos) {
     static std::random_device rd;
     static std::mt19937 gen(rd());
     static std::uniform_real_distribution<> dis(30, 100);
 
-    static double totalHeight = 0;
     double width = dis(gen), height = dis(gen);
-    auto *item = boxScene->createBody(pos.x(), pos.y(), width, height, 1, 0.3);
-    item->setBrush(Qt::red);
+    auto box = boxScene->createBody(pos.x(), pos.y(), width, height, 1, 0.3);
 
+    secondTotalHeight = totalHeight;
+
+    // 根据箱子高度调整视口
     totalHeight += height;
-    if (totalHeight > 400) {
-        smoothScroll(QPointF(0, -totalHeight + 400), 360);
+    if (totalHeight > 350 && height > 50) {
+        smoothScroll(QPointF(0, -(totalHeight - 350) - 200), 360);
     }
+
+    topBox = box.body;
+
+    return box;
 }
 
 QPointF GameWidget::mapToScene(const QPoint &pos) const {
@@ -85,7 +124,20 @@ void GameWidget::smoothScroll(const QPointF &newOrigin, double speed) {
     auto offset = newOrigin - origin();
     double length = std::sqrt(QPointF::dotProduct(offset, offset));
     animation->setDuration(static_cast<int>(length / speed * 1000));
+    animation->setEasingCurve(QEasingCurve::InOutCubic);
     animation->setStartValue(origin());
     animation->setEndValue(newOrigin);
     animation->start();
+}
+
+void GameWidget::checkCollision() {
+    if (gameState != GameState::Running) return;
+    if (topBox == nullptr) return;
+    auto topBoxPos = topBox->GetPosition();
+    auto posY = toPixel(topBoxPos.y);
+    if (-posY < secondTotalHeight) {
+        ui->lblGameOver->show();
+        smoothScroll(QPointF(0, -200), 360);
+        gameState = GameState::Stopped;
+    }
 }
