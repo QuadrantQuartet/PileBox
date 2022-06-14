@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    gamewidget=new GameWidget;
 }
 
 MainWindow::~MainWindow()
@@ -17,9 +18,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    GameWidget*gamewidget=new GameWidget;
-//    ui->verticalLayout->removeWidget(this);
-//    ui->verticalLayout->addWidget(gamewidget);
     this->setCentralWidget(gamewidget);
 }
 
