@@ -29,7 +29,7 @@ set(PROJECT_SOURCES
         gamewidget.cpp
         gamewidget.h
         gamewidget.ui
-        )
+        box2dWidget/BoxScene.cpp box2dWidget/BoxScene.h)
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test
