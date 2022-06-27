@@ -9,10 +9,11 @@
 
 #include "NinePatch/NinePatch.h"
 #include "box2dWidget/BoxScene.h"
+#include "storage.h"
 #include "ui_gamewidget.h"
 
 GameWidget::GameWidget(QWidget *parent)
-    : QWidget(parent), ui(new Ui::GameWidget) {
+    : QWidget(parent), ui(new Ui::GameWidget), best("./save.dat") {
     ui->setupUi(this);
     ui->graphicsView->installEventFilter(this);
 
@@ -29,9 +30,10 @@ GameWidget::GameWidget(QWidget *parent)
     gameOver = new QGraphicsPixmapItem(QPixmap(":/GameOver.png"));
     gameOver->setScale(gameOverWidth / gameOver->pixmap().width());
     gameOver->setPos(-gameOverWidth / 2, 100);
-
     gameOver->setZValue(100);
     overlay->addItem(gameOver);
+
+    ui->lblBest->setText(QString("Best: %1m").arg(toMeter(best)));
 
     ui->lblScore->setAttribute(Qt::WA_TransparentForMouseEvents);
     connect(ui->btnRestart, &QPushButton::clicked, this, &GameWidget::restart);
@@ -185,6 +187,8 @@ void GameWidget::checkCollision() {
     auto topBoxPos = topBox->GetPosition();
     auto posY = toPixel(topBoxPos.y);
     if (-posY < secondTotalHeight) {
+        best = std::max(static_cast<double>(best), totalHeight);
+        ui->lblBest->setText(QString("Best: %1m").arg(toMeter(best)));
         gameOver->setVisible(true);
         ui->widget->show();
         smoothScroll(QPointF(0, -200), 360);

@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include "box2dWidget/BoxScene.h"
+#include "storage.h"
 
 namespace Ui {
 class GameWidget;
@@ -53,6 +54,7 @@ class GameWidget : public QWidget {
     GameState gameState = GameState::Stopped;
     QGraphicsScene* overlay;
     QGraphicsPixmapItem* gameOver;
+    Storage best;
 
     /// 添加箱子
     BoxItem addBox(const QPointF& pos);
