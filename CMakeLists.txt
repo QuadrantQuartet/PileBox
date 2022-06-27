@@ -32,7 +32,7 @@ set(PROJECT_SOURCES
         gamewidget.ui
         box2dWidget/BoxScene.cpp box2dWidget/BoxScene.h
         NinePatch/NinePatch.cpp NinePatch/NinePatch.h
-        )
+        helpwindow.cpp helpwindow.h helpwindow.ui startmenu.cpp startmenu.h startmenu.ui)
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(PileBox

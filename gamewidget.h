@@ -10,10 +10,7 @@ namespace Ui {
 class GameWidget;
 }
 
-enum class GameState {
-    Running,
-    Stopped
-};
+enum class GameState { Running, Stopped };
 
 class GameWidget : public QWidget {
     Q_OBJECT
@@ -38,6 +35,9 @@ class GameWidget : public QWidget {
 
     Q_PROPERTY(QPointF origin READ origin WRITE setOrigin)
     Q_PROPERTY(qreal scale READ scale WRITE setScale)
+
+  signals:
+    void backToMenu();
 
   private:
     Ui::GameWidget* ui;

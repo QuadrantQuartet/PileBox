@@ -16,6 +16,9 @@ GameWidget::GameWidget(QWidget *parent)
     ui->setupUi(this);
     ui->graphicsView->installEventFilter(this);
 
+    connect(ui->btnBack, &QPushButton::clicked, this,
+            [this]() { emit backToMenu(); });
+
     // 初始化图形界面
     ui->graphicsOverlay->setAttribute(Qt::WA_TransparentForMouseEvents);
     this->overlay = new QGraphicsScene(this);

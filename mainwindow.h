@@ -2,30 +2,30 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
 #include "gamewidget.h"
+#include "helpwindow.h"
+#include "startmenu.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
-private slots:
-    void on_startButton_clicked();
+  private slots:
+    void gameStart();
+    void gameMenu();
+    void gameExit();
+    void gameHelp();
 
-    void on_exitButton_clicked();
-
-    void on_helpButton_clicked();
-
-private:
+  private:
     Ui::MainWindow *ui;
-    GameWidget*gamewidget;
 };
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

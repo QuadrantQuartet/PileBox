@@ -15,6 +15,13 @@ QPushButton:pressed, QPushButton:checked {
     /*color: #409eff;*/
 }
 
-#startMenu {
+#MainWindow {
     background-image: url(:/main.png);
+}
+
+#lblHelp {
+    background-color: #ffd161;
+    border: 5px solid #885d10;
+    padding: 10px;
+    border-radius: 10px;
 }
