@@ -22,6 +22,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(box2d CONFIG REQUIRED)
 
 set(PROJECT_SOURCES
+        resources/resources.qrc
         main.cpp
         mainwindow.cpp
         mainwindow.h
@@ -29,7 +30,9 @@ set(PROJECT_SOURCES
         gamewidget.cpp
         gamewidget.h
         gamewidget.ui
-        box2dWidget/BoxScene.cpp box2dWidget/BoxScene.h)
+        box2dWidget/BoxScene.cpp box2dWidget/BoxScene.h
+        NinePatch/NinePatch.cpp NinePatch/NinePatch.h
+        )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(PileBox

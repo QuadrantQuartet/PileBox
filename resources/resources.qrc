@@ -1,0 +1,13 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>box.9.png</file>
+        <file>sky.png</file>
+        <file>cloud_1.png</file>
+        <file>cloud_2.png</file>
+        <file>deco_1.png</file>
+        <file>deco_2.png</file>
+        <file>deco_3.png</file>
+        <file>GameOver.png</file>
+    </qresource>
+</RCC>

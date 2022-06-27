@@ -7,6 +7,7 @@
 #include <QTime>
 #include <random>
 
+#include "NinePatch/NinePatch.h"
 #include "box2dWidget/BoxScene.h"
 #include "ui_gamewidget.h"
 
@@ -20,12 +21,33 @@ GameWidget::GameWidget(QWidget *parent)
     this->setOrigin(QPointF(0, -200));
     ui->graphicsView->setScene(this->boxScene);
 
-    ui->lblGameOver->hide();
+    ui->graphicsOverlay->setAttribute(Qt::WA_TransparentForMouseEvents);
+    this->overlay = new QGraphicsScene(this);
+    ui->graphicsOverlay->setScene(this->overlay);
+    ui->graphicsOverlay->setSceneRect(-this->width() / 2., 0, this->width(),
+                                      this->height());
+    auto gameOverWidth = this->width() * 0.8;
+    gameOver = new QGraphicsPixmapItem(QPixmap(":/GameOver.png"));
+    gameOver->setScale(gameOverWidth / gameOver->pixmap().width());
+    gameOver->setPos(-gameOverWidth / 2, 100);
+    gameOver->setVisible(false);
+    gameOver->setZValue(100);
+    overlay->addItem(gameOver);
+
     ui->lblScore->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    // 背景图层
+    auto bgWidth = this->width() * 1.05;
+    auto bgHeight = bgWidth * 8000. / 512.;
+    auto *background = new QGraphicsPixmapItem(QPixmap(":/sky.png"));
+    background->setScale(bgWidth / background->pixmap().width());
+    background->setPos(-bgWidth / 2, -bgHeight * 0.95);
+    background->setZValue(1);
+    this->boxScene->addItem(background);
 
     // 初始化第一个箱子
     auto baseBox = this->addBox(QPointF(0, 0));
-    baseBox.item->setBrush(Qt::blue);
+    //    baseBox.item->setBrush(Qt::blue);
     topBox = nullptr;  // 第一个箱子不参与位置结算
 
     // 初始化定时器
@@ -68,7 +90,7 @@ void GameWidget::clickAddBox(const QPointF &pos) {
     if (-pos.y() > totalHeight &&
         gameState == GameState::Running) {  // 只允许在上方添加箱子
         auto box = addBox(pos);
-        box.item->setBrush(Qt::red);
+        //        box.item->setBrush(Qt::red);
     }
     lastTime = currentTime;
 }
@@ -76,7 +98,7 @@ void GameWidget::clickAddBox(const QPointF &pos) {
 BoxItem GameWidget::addBox(const QPointF &pos) {
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    static std::uniform_real_distribution<> dis(30, 100);
+    static std::uniform_real_distribution<> dis(75, 150);
 
     double width = dis(gen), height = dis(gen);
     auto box = boxScene->createBody(pos.x(), pos.y(), width, height, 1, 0.3);
@@ -91,6 +113,18 @@ BoxItem GameWidget::addBox(const QPointF &pos) {
     ui->lblScore->setText(QString("高度: %1m").arg(toMeter(totalHeight)));
 
     topBox = box.body;
+
+    // 加载图片
+    QPixmap pixmap = createPixmapFromNinePatchImage(QImage(":/box.9.png"),
+                                                    static_cast<int>(width),
+                                                    static_cast<int>(height));
+    auto brush = QBrush(pixmap);
+    auto brush_transform =
+        brush.transform().translate(-width / 2, -height / 2);  // 偏移原点
+    brush.setTransform(brush_transform);
+    box.item->setBrush(brush);
+
+    box.item->setZValue(3);
 
     return box;
 }
@@ -138,7 +172,7 @@ void GameWidget::checkCollision() {
     auto topBoxPos = topBox->GetPosition();
     auto posY = toPixel(topBoxPos.y);
     if (-posY < secondTotalHeight) {
-        ui->lblGameOver->show();
+        gameOver->setVisible(true);
         smoothScroll(QPointF(0, -200), 360);
         gameState = GameState::Stopped;
     }

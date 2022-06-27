@@ -49,6 +49,8 @@ class GameWidget : public QWidget {
     double secondTotalHeight = 0;
     /// 游戏状态
     GameState gameState = GameState::Stopped;
+    QGraphicsScene* overlay;
+    QGraphicsPixmapItem* gameOver;
 
     /// 添加箱子
     BoxItem addBox(const QPointF& pos);

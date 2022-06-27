@@ -6,21 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>438</width>
+    <width>429</width>
     <height>636</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>438</width>
-    <height>636</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>438</width>
-    <height>636</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>Pile Boxes</string>
@@ -43,38 +31,17 @@
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
    <property name="verticalScrollBarPolicy">
     <enum>Qt::ScrollBarAlwaysOff</enum>
    </property>
    <property name="horizontalScrollBarPolicy">
     <enum>Qt::ScrollBarAlwaysOff</enum>
    </property>
-  </widget>
-  <widget class="QLabel" name="lblGameOver">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>421</width>
-     <height>111</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>36</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Game Over!</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::PlainText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
+   <property name="renderHints">
+    <set>QPainter::Antialiasing|QPainter::LosslessImageRendering|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing|QPainter::VerticalSubpixelPositioning</set>
    </property>
   </widget>
   <widget class="QLabel" name="lblScore">
@@ -93,6 +60,22 @@
    </property>
    <property name="text">
     <string>高度: 0m</string>
+   </property>
+  </widget>
+  <widget class="QGraphicsView" name="graphicsOverlay">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>431</width>
+     <height>641</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
    </property>
   </widget>
  </widget>
