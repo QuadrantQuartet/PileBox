@@ -34,12 +34,14 @@ class GameWidget : public QWidget {
     void resizeEvent(QResizeEvent* event) override;
     ~GameWidget() override;
 
+    void restart();
+
     Q_PROPERTY(QPointF origin READ origin WRITE setOrigin)
     Q_PROPERTY(qreal scale READ scale WRITE setScale)
 
   private:
     Ui::GameWidget* ui;
-    BoxScene* boxScene;
+    BoxScene* boxScene = nullptr;
     QTimer* timer;
     /// 最上面的箱子
     b2Body* topBox = nullptr;

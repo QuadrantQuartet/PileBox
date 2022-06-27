@@ -1,0 +1,20 @@
+QPushButton {
+    background-color: #e5b358;
+    border: 5px solid #885d10;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+QPushButton:hover {
+    background-color: #ffd161;
+    /*color: #409eff;*/
+}
+
+QPushButton:pressed, QPushButton:checked {
+    border: 5px solid #ae7714;
+    /*color: #409eff;*/
+}
+
+#startMenu {
+    background-image: url(:/main.png);
+}

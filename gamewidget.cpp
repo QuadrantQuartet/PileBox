@@ -14,13 +14,9 @@
 GameWidget::GameWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::GameWidget) {
     ui->setupUi(this);
-    //    ui->graphicsView->grabMouse();
     ui->graphicsView->installEventFilter(this);
-    // 初始化图形界面
-    this->boxScene = new BoxScene(this);
-    this->setOrigin(QPointF(0, -200));
-    ui->graphicsView->setScene(this->boxScene);
 
+    // 初始化图形界面
     ui->graphicsOverlay->setAttribute(Qt::WA_TransparentForMouseEvents);
     this->overlay = new QGraphicsScene(this);
     ui->graphicsOverlay->setScene(this->overlay);
@@ -30,11 +26,35 @@ GameWidget::GameWidget(QWidget *parent)
     gameOver = new QGraphicsPixmapItem(QPixmap(":/GameOver.png"));
     gameOver->setScale(gameOverWidth / gameOver->pixmap().width());
     gameOver->setPos(-gameOverWidth / 2, 100);
-    gameOver->setVisible(false);
+
     gameOver->setZValue(100);
     overlay->addItem(gameOver);
 
     ui->lblScore->setAttribute(Qt::WA_TransparentForMouseEvents);
+    connect(ui->btnRestart, &QPushButton::clicked, this, &GameWidget::restart);
+
+    // 初始化定时器
+    this->timer = new QTimer(this);
+    timer->setInterval(100);
+    connect(this->timer, &QTimer::timeout, this, &GameWidget::checkCollision);
+
+    // 启动游戏
+    restart();
+}
+
+GameWidget::~GameWidget() {
+    delete boxScene;
+    delete ui;
+}
+
+void GameWidget::restart() {
+    totalHeight = 0;
+    secondTotalHeight = 0;
+
+    auto *oldScene = this->boxScene;
+    this->boxScene = new BoxScene(nullptr);
+    this->setOrigin(QPointF(0, -200));
+    ui->graphicsView->setScene(this->boxScene);
 
     // 背景图层
     auto bgWidth = this->width() * 1.05;
@@ -46,21 +66,17 @@ GameWidget::GameWidget(QWidget *parent)
     this->boxScene->addItem(background);
 
     // 初始化第一个箱子
-    auto baseBox = this->addBox(QPointF(0, 0));
-    //    baseBox.item->setBrush(Qt::blue);
+    this->addBox(QPointF(0, -200));
     topBox = nullptr;  // 第一个箱子不参与位置结算
 
-    // 初始化定时器
-    this->timer = new QTimer(this);
-    timer->setInterval(100);
-    connect(this->timer, &QTimer::timeout, this, &GameWidget::checkCollision);
-    timer->start();
+    delete oldScene;
 
+    gameOver->setVisible(false);
+    ui->widget->hide();
+    timer->start();
     // 初始化游戏状态
     this->gameState = GameState::Running;
 }
-
-GameWidget::~GameWidget() { delete ui; }
 
 bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
     if (watched == ui->graphicsView) {
@@ -69,11 +85,6 @@ bool GameWidget::eventFilter(QObject *watched, QEvent *event) {
             auto mouseEvent = dynamic_cast<QMouseEvent *>(event);
             auto pos = mapToScene(mouseEvent->pos());
             clickAddBox(pos);
-            return true;
-        } else if (eventType == QEvent::Wheel) {
-            auto wheelEvent = dynamic_cast<QWheelEvent *>(event);
-            auto factor = wheelEvent->angleDelta().y() / 5.0;
-            this->smoothScroll(QPointF(0, -factor) + origin(), 500);
             return true;
         }
     }
@@ -89,8 +100,7 @@ void GameWidget::clickAddBox(const QPointF &pos) {
 
     if (-pos.y() > totalHeight &&
         gameState == GameState::Running) {  // 只允许在上方添加箱子
-        auto box = addBox(pos);
-        //        box.item->setBrush(Qt::red);
+        addBox(pos);
     }
     lastTime = currentTime;
 }
@@ -173,6 +183,7 @@ void GameWidget::checkCollision() {
     auto posY = toPixel(topBoxPos.y);
     if (-posY < secondTotalHeight) {
         gameOver->setVisible(true);
+        ui->widget->show();
         smoothScroll(QPointF(0, -200), 360);
         gameState = GameState::Stopped;
     }
