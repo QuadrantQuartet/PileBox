@@ -49,6 +49,7 @@ GameWidget::GameWidget(QWidget *parent)
 
 GameWidget::~GameWidget() {
     delete boxScene;
+    delete animation;
     delete ui;
 }
 
@@ -167,7 +168,6 @@ void GameWidget::setScale(qreal scale) {
     ui->graphicsView->scale(scale, scale);
 }
 void GameWidget::smoothScroll(const QPointF &newOrigin, double speed) {
-    static QPropertyAnimation *animation = nullptr;
     if (animation == nullptr)
         animation = new QPropertyAnimation(this, "origin");
 

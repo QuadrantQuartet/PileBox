@@ -3,6 +3,7 @@
 
 #include <QGraphicsScene>
 #include <QWidget>
+#include <QPropertyAnimation>
 
 #include "box2dWidget/BoxScene.h"
 #include "storage.h"
@@ -55,6 +56,7 @@ class GameWidget : public QWidget {
     QGraphicsScene* overlay;
     QGraphicsPixmapItem* gameOver;
     Storage best;
+    QPropertyAnimation *animation = nullptr;
 
     /// 添加箱子
     BoxItem addBox(const QPointF& pos);
